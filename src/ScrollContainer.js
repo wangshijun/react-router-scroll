@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import PropTypes from 'prop-types'
+import PropTypes from 'prop-types';
 import warning from 'warning';
 
 const propTypes = {
@@ -77,7 +77,7 @@ class ScrollContainer extends React.Component {
   };
 
   render() {
-    return this.props.children;
+    return React.Children.only(this.props.children);
   }
 }
 

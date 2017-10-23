@@ -66,7 +66,7 @@ shouldUpdateScroll = (prevRouterProps, { routes }) => {
 
 ### Scrolling elements other than `window`
 
-Use `<ScrollContainer>` in components rendered by a `ScrollContext` to manage the scroll behavior of elements other than `window`. Each `<ScrollContainer>` must be given a unique `scrollKey`, and can be given an optional `shouldUpdateScroll` callback that behaves as above.
+Use `<ScrollContainer>` in components rendered by a `ScrollContext` to manage the scroll behavior of elements other than `window`. Each `<ScrollContainer>` must be given a unique `scrollKey`, and can be given an optional `shouldUpdateScroll` callback that behaves as above. `ScrollContainer` should have exactly one child, which will be the node managed.
 
 ```js
 import { ScrollContainer } from 'react-router-scroll';
