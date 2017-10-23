@@ -3,6 +3,9 @@
   "env": {
     "browser": true
   },
+  "rules": {
+    "react/no-find-dom-node": "off"
+  },
   "globals": {
     "__DEV__": false
   }

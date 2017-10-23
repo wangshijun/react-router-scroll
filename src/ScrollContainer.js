@@ -28,14 +28,14 @@ class ScrollContainer extends React.Component {
   componentDidMount() {
     this.context.scrollBehavior.registerElement(
       this.props.scrollKey,
-      ReactDOM.findDOMNode(this), // eslint-disable-line react/no-find-dom-node
+      ReactDOM.findDOMNode(this),
       this.shouldUpdateScroll,
     );
 
     // Only keep around the current DOM node in development, as this is only
     // for emitting the appropriate warning.
     if (__DEV__) {
-      this.domNode = ReactDOM.findDOMNode(this); // eslint-disable-line react/no-find-dom-node
+      this.domNode = ReactDOM.findDOMNode(this);
     }
   }
 
@@ -49,7 +49,7 @@ class ScrollContainer extends React.Component {
   componentDidUpdate() {
     if (__DEV__) {
       const prevDomNode = this.domNode;
-      this.domNode = ReactDOM.findDOMNode(this); // eslint-disable-line react/no-find-dom-node
+      this.domNode = ReactDOM.findDOMNode(this);
 
       warning(
         this.domNode === prevDomNode,
