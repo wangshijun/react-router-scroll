@@ -1,10 +1,12 @@
 {
   "presets": [
-    ["latest", {
-      "es2015": { "loose": true }
-    }],
-    "stage-1",
+    [
+      "env",
+      {
+        "modules": false
+      }
+    ],
     "react"
   ],
-  "plugins": ["dev-expression", "add-module-exports"]
+  "plugins": ["dev-expression", "transform-class-properties", "external-helpers"]
 }
