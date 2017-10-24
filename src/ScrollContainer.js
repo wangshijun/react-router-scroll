@@ -3,6 +3,8 @@ import ReactDOM from 'react-dom';
 import PropTypes from 'prop-types';
 import warning from 'warning';
 
+const DEV = process.env.NODE_ENV !== 'production';
+
 const propTypes = {
   scrollKey: PropTypes.string.isRequired,
   shouldUpdateScroll: PropTypes.func,
@@ -34,7 +36,7 @@ class ScrollContainer extends React.Component {
 
     // Only keep around the current DOM node in development, as this is only
     // for emitting the appropriate warning.
-    if (__DEV__) {
+    if (DEV) {
       this.domNode = ReactDOM.findDOMNode(this);
     }
   }
@@ -47,7 +49,7 @@ class ScrollContainer extends React.Component {
   }
 
   componentDidUpdate() {
-    if (__DEV__) {
+    if (DEV) {
       const prevDomNode = this.domNode;
       this.domNode = ReactDOM.findDOMNode(this);
 

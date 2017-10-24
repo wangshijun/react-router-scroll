@@ -1,17 +1,18 @@
-import scrollLeft from 'dom-helpers/query/scrollLeft';
-import scrollTop from 'dom-helpers/query/scrollTop';
+import 'babel-polyfill';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { Switch, MemoryRouter } from 'react-router-dom';
+import { Switch, Router, Route } from 'react-router-dom';
+import createMemoryHistory from 'history/createMemoryHistory';
+import scrollTop from 'dom-helpers/query/scrollTop';
+import scrollLeft from 'dom-helpers/query/scrollLeft';
 
-import StateStorage from '../src/StateStorage';
 import ScrollContext from '../src/ScrollBehaviorContext';
 
-import { syncRoutes } from './routes';
-import { delay } from './run';
-import renderTestSequence from './stepping';
+import { Page1, Page2 } from './components';
+import { render, scrollY, scrollX } from './scroll-utils';
 
-describe('useScroll', () => {
+
+describe('<ScrollContext>', () => {
   let container;
 
   beforeEach(() => {
@@ -26,124 +27,82 @@ describe('useScroll', () => {
     document.body.removeChild(container);
   });
 
-  // Create a new history every time to avoid old state.
-  [
-    MemoryRouter,
-  ].forEach((createHistory) => {
-    beforeEach(() => {
-    });
+  it('should have the correct default behavior', async () => {
+    const history = createMemoryHistory();
+    const App = () => (
+      <Router history={history}>
+        <ScrollContext>
+          <Switch>
+            <Route path="/" exact component={Page1} />
+            <Route path="/page2" exact component={Page2} />
+          </Switch>
+        </ScrollContext>
+      </Router>
+    );
 
-    describe(createHistory.name, () => {
-      [
-        ['syncRoutes', syncRoutes],
-      ].forEach(([routesName]) => {
-        describe(routesName, () => {
-          it('should have correct default behavior', (done) => {
-            const steps = [
-              ({ history }) => {
-                scrollTop(window, 15000);
-                delay(() => history.push('/page2'));
-              },
-              ({ history }) => {
-                expect(scrollTop(window)).to.equal(0);
-                history.goBack();
-              },
-              () => {
-                expect(scrollTop(window)).to.equal(15000);
-                done();
-              },
-            ];
+    await render(<App />, container);
+    expect(scrollTop(window)).to.equal(0, 'at load');
 
-            const App = () => (<ScrollContext>
-              <Switch>
-                { syncRoutes }
-              </Switch>
-            </ScrollContext>);
+    await scrollY(window, 15000);
+    expect(scrollTop(window)).to.equal(15000, 'after scrolling');
 
-            renderTestSequence({
-              subject: App,
-              steps,
-              target: container,
-            });
-          });
+    history.push('/page2');
+    expect(scrollTop(window)).to.equal(0, 'after navigation');
 
-          it('should support custom behavior', (done) => {
-            let prevPosition;
-            let position;
+    history.goBack();
+    expect(scrollTop(window)).to.equal(15000, 'after going back');
+  });
 
-            function shouldUpdateScroll(prevRouterState, routerState) {
-              const stateStorage = new StateStorage(routerState.router);
+  it('should have the correct default behavior', async () => {
+    function shouldUpdateScroll(prevRouterState, routerState) {
+      if (prevRouterState === null) {
+        return [10, 20];
+      }
+      console.log(prevRouterState.location);
+      console.log(routerState.location);
+      if (prevRouterState.location.pathname === '/') {
+        return false;
+      }
 
-              if (prevRouterState) {
-                prevPosition = stateStorage.read(prevRouterState.location);
-              }
+      if (routerState.history.action === 'POP') {
+        return true;
+      }
 
-              position = stateStorage.read(routerState.location);
+      expect.fail();
+      return false;
+    }
 
-              if (prevRouterState === null) {
-                return [10, 20];
-              }
+    const history = createMemoryHistory();
+    const App = () => (
+      <Router history={history}>
+        <ScrollContext shouldUpdateScroll={shouldUpdateScroll}>
+          <Switch>
+            <Route path="/" exact component={Page1} />
+            <Route path="/page2" exact component={Page2} />
+          </Switch>
+        </ScrollContext>
+      </Router>
+   );
 
-              if (prevRouterState.routes[0].path === '/') {
-                return false;
-              }
+    await render(<App />, container);
+    expect(scrollLeft(window)).to.equal(10, 'left at start');
+    expect(scrollTop(window)).to.equal(20, 'top at start');
 
-              if (routerState.location.action === 'POP') {
-                return true;
-              }
+    await scrollY(window, 9000);
+    expect(scrollLeft(window)).to.equal(10, 'left after first scrolling');
+    expect(scrollTop(window)).to.equal(9000, 'top after first scrolling');
 
-              expect.fail();
-              return false;
-            }
+    history.push('/page2');
+    expect(scrollLeft(window)).to.equal(10, 'left after navigation');
+    // It should not scroll up, but some browsers do scroll up a tiny bit
+    // let's just check it's not too much
+    expect(scrollTop(window)).to.be.within(8500, 9000, 'top after navigation');
 
-            const steps = [
-              () => {
-                expect(scrollLeft(window)).to.equal(10);
-                expect(scrollTop(window)).to.equal(20);
+    await scrollX(window, 500);
+    await scrollY(window, 3000);
 
-                scrollTop(window, 15000);
-
-                delay(() => history.push('/page2'));
-              },
-              () => {
-                expect(prevPosition).to.eql([10, 15000]);
-                expect(position).to.not.exist();
-
-                expect(scrollLeft(window)).to.not.equal(0);
-                expect(scrollTop(window)).to.not.equal(0);
-
-                scrollLeft(window, 0);
-                scrollTop(window, 0);
-
-                delay(() => history.goBack());
-              },
-              () => {
-                expect(prevPosition).to.eql([0, 0]);
-                expect(position).to.eql([10, 15000]);
-
-                expect(scrollLeft(window)).to.equal(10);
-                expect(scrollTop(window)).to.equal(15000);
-
-                done();
-              },
-            ];
-
-            const App = () => (<ScrollContext
-              shouldUpdateScroll={shouldUpdateScroll}
-            >
-              <Switch>
-                { syncRoutes }
-              </Switch>
-            </ScrollContext>);
-
-            renderTestSequence({
-              subject: App,
-              steps,
-              target: container,
-            });
-          });
-        });
-      });
-    });
+    history.goBack();
+    expect(scrollLeft(window)).to.equal(10, 'left after going back');
+    expect(scrollTop(window)).to.equal(9000, 'top after going back');
   });
 });

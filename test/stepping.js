@@ -1,6 +1,6 @@
-import { render, unmountComponentAtNode } from 'react-dom';
+import ReactDOM from 'react-dom';
 import React from 'react';
-import PropTypes from 'prop-types'
+import PropTypes from 'prop-types';
 import { Route, MemoryRouter } from 'react-router-dom';
 
 // a way to render any part of your app inside a MemoryRouter
@@ -28,9 +28,9 @@ const renderTestSequence = ({
     assert() {
       const nextStep = steps.shift();
       if (nextStep) {
-        nextStep({ ...this.props, target });
+        nextStep(Object.assign({}, this.props, target));
       } else {
-        unmountComponentAtNode(target);
+        ReactDOM.unmountComponentAtNode(target);
       }
     }
 
@@ -43,20 +43,32 @@ const renderTestSequence = ({
     children: PropTypes.element.isRequired,
   };
 
-  const Test = () => (<MemoryRouter
-    initialIndex={initialIndex}
-    initialEntries={initialEntries}
-  >
-    <Route
-      render={props => (
-        <Assert {...props}>
-          <Subject />
-        </Assert>
-      )}
-    />
-  </MemoryRouter>);
+  /* eslint-disable react/no-multi-comp */
 
-  render(<Test />, target);
+  class Test extends React.PureComponent {
+    componentDidCatch(error) {
+      console.error(error);
+    }
+
+    render() {
+      return (<MemoryRouter
+        initialIndex={initialIndex}
+        initialEntries={initialEntries}
+      >
+        <Route
+          render={props => (
+            <Assert {...props}>
+              <Subject />
+            </Assert>
+          )}
+        />
+      </MemoryRouter>);
+    }
+  }
+
+  /* eslint-enable react/no-multi-comp */
+
+  ReactDOM.render(<Test />, target);
 };
 
 export default renderTestSequence;

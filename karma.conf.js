@@ -1,4 +1,7 @@
-const webpack = require('webpack'); // eslint-disable-line import/no-extraneous-dependencies
+const babel = require('rollup-plugin-babel');
+const resolve = require('rollup-plugin-node-resolve');
+const commonjs = require('rollup-plugin-commonjs');
+const replace = require('rollup-plugin-replace');
 
 module.exports = (config) => {
   const { env } = process;
@@ -6,35 +9,30 @@ module.exports = (config) => {
   config.set({
     frameworks: ['mocha', 'sinon-chai'],
 
-    files: ['test/index.js'],
+    files: [{ pattern: 'test/*.test.js', watched: false }],
 
     preprocessors: {
-      'test/index.js': ['webpack', 'sourcemap'],
+      'test/*.test.js': ['rollup'],
     },
 
-    webpack: {
-      module: {
-        loaders: [
-          { test: /\.js$/, exclude: /node_modules/, loader: 'babel' },
-        ],
-      },
+    rollupPreprocessor: {
       plugins: [
-        new webpack.DefinePlugin({
+        babel({ exclude: 'node_modules/**' }),
+        resolve(),
+        commonjs({ include: 'node_modules/**' }),
+        replace({
           'process.env.NODE_ENV': JSON.stringify('test'),
-          __DEV__: true,
         }),
       ],
-      devtool: 'cheap-module-inline-source-map',
-    },
-
-    webpackMiddleware: {
-      noInfo: true,
+      format: 'iife',
+      name: 'reactRouterScroll',
+      sourcemap: 'inline',
     },
 
     reporters: ['mocha'],
 
     mochaReporter: {
-      output: 'autowatch',
+      output: 'minimal',
     },
 
     customLaunchers: {
