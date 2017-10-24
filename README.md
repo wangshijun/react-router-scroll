@@ -2,9 +2,9 @@
 
 [React Router](https://github.com/reactjs/react-router) scroll management.
 
-react-router-scroll is a React Router middleware that adds scroll management using [scroll-behavior](https://github.com/taion/scroll-behavior). By default, the middleware adds browser-style scroll behavior, but you can customize it to scroll however you want on route transitions.
+react-router-scroll is a React Router component that adds scroll management using [scroll-behavior](https://github.com/taion/scroll-behavior). By default, the component adds browser-style scroll behavior, but you can customize it to scroll however you want on route transitions.
 
-This is a fork of the original React Router scroll made to support Reat Router v4. Currently all the original features should be working but it is still in early development, tests have not been completely updated yet and there are probably bugs to be encountered. Do not hesitate to signal them, or een fix them through pull requests.
+This is a fork of the original React Router scroll made to support Reat Router v4. Currently all the original features should be working but it is still in early development, tests have not been completely updated yet and there are probably bugs to be encountered. Do not hesitate to signal them, or fix them through pull requests.
 
 ## Usage
 
@@ -29,7 +29,7 @@ ReactDOM.render(
 ### Installation
 
 ```shell
-$ yarn add ytase/react-router-scroll#build
+$ yarn add react-router-scroll-4
 ```
 
 ### Basic usage
@@ -38,7 +38,7 @@ Use the `ScrollContext` wrapper as in the example above. `ScrollContext` Should 
 
 ### Custom scroll behavior
 
-You can provide a custom `shouldUpdateScroll` as a property of `ScrollContext`. This function is called with the previous and the current router props.
+You can provide a custom `shouldUpdateScroll` as a property of `ScrollContext`. This function is called with the previous and the current router props. Those properties correspond to those accessible through [withRouter](https://reacttraining.com/react-router/web/api/withRouter).
 
 The function can return:
 
@@ -47,16 +47,16 @@ The function can return:
 - a truthy value to emulate the browser default scroll behavior
 
 ```js
-shouldUpdateScroll = (prevRouterProps, { location }) => (
+shouldUpdateScroll = (prevRouterProps, { location, history }) => (
   prevRouterProps && location.pathname !== prevRouterProps.location.pathname
 );
 
-shouldUpdateScroll = (prevRouterProps, { routes }) => {
-  if (routes.some(route => route.ignoreScrollBehavior)) {
+shouldUpdateScroll = (prevRouterProps, { location, history }) => {
+  if (history.action === 'POP') {
     return false;
   }
 
-  if (routes.some(route => route.scrollToTop)) {
+  if (location.state["MY-USER-KEY"] === "NoScroll") {
     return [0, 0];
   }
 
