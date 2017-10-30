@@ -10,7 +10,7 @@ This is a fork of the original React Router scroll made to support Reat Router v
 
 ```js
 import { BrowserRouter } from 'react-router-dom';
-import { ScrollContext } from 'react-router-scroll';
+import { ScrollContext } from 'react-router-scroll-4';
 
 /* ... */
 
