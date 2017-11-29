@@ -7,6 +7,7 @@ import SessionStorage from './StateStorage';
 
 const propTypes = {
   shouldUpdateScroll: PropTypes.func,
+  updateTimeout: PropTypes.number,
   children: PropTypes.element.isRequired,
   location: PropTypes.object.isRequired,
   history: PropTypes.object.isRequired,
@@ -29,7 +30,9 @@ class ScrollContext extends React.Component {
       shouldUpdateScroll: this.shouldUpdateScroll,
     });
 
-    this.scrollBehavior.updateScroll(null, this.getRouterProps());
+    setTimeout(() => {
+      this.scrollBehavior.updateScroll(null, this.getRouterProps());
+    }, props.updateTimeout || 0);
   }
 
   getChildContext() {
@@ -51,7 +54,9 @@ class ScrollContext extends React.Component {
       location: prevProps.location,
     };
 
-    this.scrollBehavior.updateScroll(prevRouterProps, { history, location });
+    setTimeout(() => {
+      this.scrollBehavior.updateScroll(prevRouterProps, { history, location });
+    }, this.props.updateTimeout || 0);
   }
 
   componentWillUnmount() {

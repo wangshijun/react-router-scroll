@@ -1,6 +1,6 @@
 {
-  "name": "react-router-scroll-4",
-  "version": "1.0.0-beta.1",
+  "name": "react-router-scroll-timeout",
+  "version": "1.0.0-beta.2",
   "description": "React Router 4 scroll management",
   "files": [
     "lib"
